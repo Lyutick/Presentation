@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Острые козырьки — презентация</title>
+
+<!-- Логотип вкладки -->
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+
+<link rel="preload" as="image" href="background.webp">
+<link rel="preload" as="image" href="start.png">
+<link rel="preload" as="image" href="slide1.webp">
+<link rel="preload" as="image" href="slide2.webp">
+<link rel="preload" as="image" href="slide3.webp">
+<link rel="preload" as="image" href="slide4.webp">
+<link rel="preload" as="image" href="slide5.webp">
+<link rel="preload" as="image" href="slide6.webp">
+<link rel="preload" as="image" href="slide7.webp">
+<link rel="preload" as="image" href="slide8.webp">
+<link rel="preload" as="image" href="image1.webp">
+<link rel="preload" as="audio" href="sound1.mp3">
+<link rel="preload" as="audio" href="music1.mp3">
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    background: #0a0a0f;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    overflow: hidden;
+  }
+
+  /* ===================== МЕНЮ ===================== */
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: url('background.webp') center/cover no-repeat;
+    opacity: 1;
+    transition: opacity 0.8s ease, transform 1s ease;
+  }
+
+  .menu.hidden {
+    opacity: 0;
+    transform: scale(1.06);
+    pointer-events: none;
+  }
+
+  .menu::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 50%,
+      rgba(60, 40, 10, 0.35) 100%
+    );
+    pointer-events: none;
+  }
+
+  .start-btn {
+    position: absolute;
+    right: 32px;
+    bottom: 28px;
+    z-index: 2;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    width: 126px;
+    height: 25px;
+  }
+
+  .start-btn .start-img {
+    display: block;
+    width: 126px;
+    height: 25px;
+    object-fit: contain;
+  }
+
+  /* ===================== ПРЕЗЕНТАЦИЯ ===================== */
+  .deck {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .slide {
+    position: absolute;
+    width: min(100vw, 177.78vh);
+    height: min(56.25vw, 100vh);
+    overflow: hidden;
+    opacity: 0;
+    transform: scale(1.04);
+    transition: opacity 1.2s ease, transform 1.4s ease;
+    pointer-events: none;
+  }
+
+  .slide.active {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+  }
+
+  .slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .slide::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 55%,
+      rgba(0,0,0,0.45) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* ===================== ХОТСПОТЫ ===================== */
+  .hotspots {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .slide:not(.active) .hotspots {
+    display: none;
+  }
+
+  .hotspot {
+    position: absolute;
+    pointer-events: auto;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .hotspot:focus-visible {
+    outline: 1px solid rgba(198, 152, 68, 0.7);
+    outline-offset: 2px;
+  }
+
+  /* ===================== ПОДСКАЗКА ===================== */
+  .tooltip {
+    position: fixed;
+    z-index: 200;
+    max-width: 340px;
+    padding: 14px 18px;
+    background: rgba(18, 14, 10, 0.97);
+    border: 1px solid rgba(198, 152, 68, 0.55);
+    border-radius: 8px;
+    color: #f0e6d2;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    box-shadow:
+      0 14px 44px rgba(0,0,0,0.65),
+      0 0 0 1px rgba(198, 152, 68, 0.15);
+    backdrop-filter: blur(8px);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ===================== МЕМ-МОДАЛКА ===================== */
+  .meme-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  .meme-modal.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .meme-modal img {
+    max-width: 82vw;
+    max-height: 82vh;
+    border-radius: 8px;
+    border: 1px solid rgba(198, 152, 68, 0.5);
+    box-shadow:
+      0 24px 80px rgba(0,0,0,0.85),
+      0 0 60px rgba(198, 152, 68, 0.18);
+
+    transform: scale(0.92);
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .meme-modal.visible img {
+    transform: scale(1);
+  }
+
+  /* ===================== КАЛИБРОВКА ===================== */
+  body.debug .hotspot {
+    background: rgba(255, 60, 60, 0.25);
+    border: 1px dashed rgba(255, 60, 60, 0.9);
+  }
+
+  body.debug .deck {
+    cursor: crosshair;
+  }
+
+  .calib-rect {
+    position: absolute;
+    background: rgba(60, 220, 100, 0.3);
+    border: 1px dashed rgba(60, 220, 100, 0.9);
+    pointer-events: none;
+    z-index: 9999;
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============ СТАРТОВОЕ МЕНЮ ============ -->
+  <div class="menu" id="menu">
+    <button class="start-btn" id="startBtn" aria-label="Смотреть">
+      <img class="start-img" src="start.png" alt="Смотреть">
+    </button>
+  </div>
+
+  <!-- ============ ПРЕЗЕНТАЦИЯ ============ -->
+  <div class="deck">
+    <section class="slide" data-slide="1">
+      <img src="slide1.webp" alt="Острые козырьки — как британская банда стала мировым феноменом">
+    </section>
+
+    <section class="slide" data-slide="2">
+      <img src="slide2.webp" alt="Слайд 2">
+    </section>
+
+    <section class="slide" data-slide="3">
+      <img src="slide3.webp" alt="Слайд 3">
+    </section>
+
+    <section class="slide" data-slide="4">
+      <img src="slide4.webp" alt="Слайд 4">
+    </section>
+
+    <!-- ========== СЛАЙД 5 ========== -->
+    <section class="slide" data-slide="5">
+      <img src="slide5.webp" alt="Саундтрек: анахронизм как оружие">
+
+      <div class="hotspots">
+        <button class="hotspot"
+                style="left:4%; top:11.5%; width:26%; height:9%;"
+                aria-label="Анахронизм"
+                data-tip="Анахронизм — намеренное или случайное несоответствие хронологии: когда в одном времени появляются элементы другого. В «Козырьках» современная музыка звучит в антураже 1920-х."></button>
+
+        <button class="hotspot"
+                style="left:14%; top:53.8%; width:25%; height:4.9%;"
+                aria-label="Arctic Monkeys"
+                data-tip="Arctic Monkeys — британская инди-рок-группа из Шеффилда, основана в 2002 году. Один из самых успешных коллективов новой волны британского рока."></button>
+
+        <button class="hotspot"
+                style="left:45%; top:53.8%; width:7.5%; height:4.9%;"
+                aria-label="Black Sabbath"
+                data-tip="Black Sabbath — британская рок-группа из Бирмингема, основана в 1968 году. Пионеры хэви-метала. Их мрачное, тяжёлое звучание идеально совпало с атмосферой сериала."></button>
+
+        <button class="hotspot"
+                style="left:3.75%; top:58.7%; width:12.75%; height:4.9%;"
+                aria-label="Black Sabbath"
+                data-tip="Black Sabbath — британская рок-группа из Бирмингема, основана в 1968 году. Пионеры хэви-метала. Их мрачное, тяжёлое звучание идеально совпало с атмосферой сериала."></button>
+
+        <button class="hotspot"
+                style="left:3.75%; top:63.6%; width:15.25%; height:4.9%;"
+                aria-label="Бирмингем"
+                data-tip="Бирмингем — город в центральной Англии, место действия «Острых козырьков». В 1920-х — крупный промышленный центр с тяжёлой криминальной атмосферой."></button>
+
+        <button class="hotspot"
+                style="left:34.5%; top:73.3%; width:18.5%; height:4.9%;"
+                aria-label="Red Right Hand"
+                data-tip="«Red Right Hand» — песня Ника Кейва 1994 года. Главная музыкальная тема «Острых козырьков». Название отсылает к «деснице Господней» — карающей силе."></button>
+
+        <button class="hotspot"
+                style="left:8.75%; top:78.2%; width:9.75%; height:4.9%;"
+                aria-label="Red Right Hand"
+                data-tip="«Red Right Hand» — песня Ника Кейва 1994 года. Главная музыкальная тема «Острых козырьков». Название отсылает к «деснице Господней» — карающей силе."></button>
+
+        <button class="hotspot"
+                style="left:21%; top:78.2%; width:19%; height:4.9%;"
+                aria-label="Ник Кейв"
+                data-tip="Ник Кейв — австралийский музыкант, писатель, актёр. Лидер группы Nick Cave and the Bad Seeds. Автор главной темы «Острых козырьков»."></button>
+
+        <button class="hotspot"
+                style="left:3.75%; top:88%; width:10.25%; height:4.9%;"
+                aria-label="Кавер"
+                data-tip="Кавер — новая версия уже существующей песни, исполненная другим артистом. Кавер PJ Harvey на «Red Right Hand» — один из самых известных."></button>
+
+        <button class="hotspot"
+                style="left:29.5%; top:88%; width:21%; height:4.9%;"
+                aria-label="PJ Harvey"
+                data-tip="PJ Harvey — британская рок-исполнительница, одна из самых влиятельных артисток в истории британской музыки. Записала кавер-версию «Red Right Hand» для сериала."></button>
+      </div>
+    </section>
+
+    <!-- ========== СЛАЙД 6 ========== -->
+    <section class="slide" data-slide="6">
+      <img src="slide6.webp" alt="Томми Шелби как мем-икона">
+
+      <div class="hotspots">
+        <button class="hotspot"
+                style="left:38.5%; top:45%; width:9.5%; height:5%;"
+                aria-label="Don't Even Joke Lad"
+                data-meme="image1.webp"></button>
+
+        <button class="hotspot"
+                style="left:12%; top:50.5%; width:22%; height:5%;"
+                aria-label="Don't Even Joke Lad"
+                data-meme="image1.webp"></button>
+      </div>
+    </section>
+
+    <!-- ========== СЛАЙД 7 ========== -->
+    <section class="slide" data-slide="7">
+      <img src="slide7.webp" alt="Слайд 7">
+    </section>
+
+    <!-- ========== СЛАЙД 8 ========== -->
+    <section class="slide" data-slide="8">
+      <img src="slide8.webp" alt="Слайд 8">
+    </section>
+  </div>
+
+  <!-- ============ ПОДСКАЗКА ============ -->
+  <div class="tooltip" id="tooltip" role="tooltip"></div>
+
+  <!-- ============ МЕМ-МОДАЛКА ============ -->
+  <div class="meme-modal" id="memeModal">
+    <img id="memeImg" src="" alt="">
+  </div>
+
+<script>
+  const menu      = document.getElementById('menu');
+  const startBtn  = document.getElementById('startBtn');
+  const slides    = document.querySelectorAll('.slide');
+  const tooltip   = document.getElementById('tooltip');
+  const memeModal = document.getElementById('memeModal');
+  const memeImg   = document.getElementById('memeImg');
+  let index = 0;
+  let started = false;
+
+  /* ---------- звук клика ---------- */
+  const clickSound = new Audio('sound1.mp3');
+  clickSound.preload = 'auto';
+  clickSound.volume = 0.8;
+
+  function playSound() {
+    try {
+      clickSound.currentTime = 0;
+      clickSound.play().catch(() => {});
+    } catch (e) {}
+  }
+
+  /* ---------- фоновая музыка ---------- */
+  const bgMusic = new Audio('music1.mp3');
+  bgMusic.preload = 'auto';
+  bgMusic.loop = true;
+  bgMusic.volume = 0.08;
+
+  function startMusic() {
+    try {
+      bgMusic.currentTime = 0;
+      bgMusic.play().catch(() => {});
+    } catch (e) {}
+  }
+
+  /* ---------- подсказка ---------- */
+  function hideTooltip() {
+    tooltip.classList.remove('visible');
+    document.querySelectorAll('.hotspot.active').forEach(h => h.classList.remove('active'));
+  }
+
+  function showTooltip(el) {
+    tooltip.classList.remove('visible');
+    tooltip.textContent = el.dataset.tip;
+    void tooltip.offsetWidth;
+
+    const rect  = el.getBoundingClientRect();
+    const tRect = tooltip.getBoundingClientRect();
+
+    let left = rect.left + rect.width / 2 - tRect.width / 2;
+    let top  = rect.bottom + 12;
+
+    left = Math.max(12, Math.min(window.innerWidth - tRect.width - 12, left));
+
+    if (top + tRect.height > window.innerHeight - 12) {
+      top = rect.top - tRect.height - 12;
+    }
+
+    tooltip.style.left = left + 'px';
+    tooltip.style.top  = top  + 'px';
+    tooltip.classList.add('visible');
+
+    document.querySelectorAll('.hotspot.active').forEach(h => h.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  /* ---------- мем-модалка ---------- */
+  function openMeme(src) {
+    memeImg.src = src;
+    memeModal.classList.add('visible');
+  }
+
+  function closeMeme() {
+    memeModal.classList.remove('visible');
+  }
+
+  memeModal.addEventListener('click', closeMeme);
+
+  /* ---------- клик по документу ---------- */
+  document.addEventListener('click', (e) => {
+    if (document.body.classList.contains('debug')) return;
+
+    const hotspot = e.target.closest('.hotspot');
+    const inActiveSlide = hotspot && hotspot.closest('.slide.active');
+
+    if (inActiveSlide && started) {
+      e.stopPropagation();
+
+      if (hotspot.dataset.meme) {
+        openMeme(hotspot.dataset.meme);
+        return;
+      }
+
+      if (hotspot.classList.contains('active')) {
+        hideTooltip();
+        return;
+      }
+      showTooltip(hotspot);
+    } else {
+      hideTooltip();
+    }
+  });
+
+  /* ---------- показ слайда ---------- */
+  function show(i) {
+    index = Math.max(0, Math.min(slides.length - 1, i));
+
+    slides.forEach((s, k) => {
+      if (k === index) {
+        s.classList.remove('active');
+        void s.offsetWidth;
+        s.classList.add('active');
+      } else {
+        s.classList.remove('active');
+      }
+    });
+
+    hideTooltip();
+    closeMeme();
+  }
+
+  /* ---------- старт ---------- */
+  function startPresentation() {
+    if (started) return;
+    started = true;
+
+    playSound();
+    startMusic();
+    menu.classList.add('hidden');
+
+    setTimeout(() => show(0), 700);
+  }
+
+  startBtn.addEventListener('click', startPresentation);
+
+  /* ---------- навигация ---------- */
+  function go(delta) {
+    const target = index + delta;
+    if (target < 0 || target >= slides.length) return;
+    playSound();
+    show(target);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (memeModal.classList.contains('visible')) {
+        closeMeme();
+      } else {
+        hideTooltip();
+      }
+      return;
+    }
+
+    if (memeModal.classList.contains('visible')) return;
+
+    if (!started) {
+      if (e.key === 'Enter') { e.preventDefault(); startPresentation(); }
+      return;
+    }
+
+    const key = e.key.toLowerCase();
+    if (key === 'arrowright' || key === 'd' || key === ' ' || key === 'pagedown') {
+      e.preventDefault(); go(1);
+    }
+    if (key === 'arrowleft' || key === 'a' || key === 'pageup') {
+      e.preventDefault(); go(-1);
+    }
+  });
+
+  /* ============================================================
+     КАЛИБРОВКА ХОТСПОТОВ
+     ------------------------------------------------------------
+     1. Перейди на нужный слайд (5 или 6).
+     2. В консоли: document.body.classList.add('debug')
+     3. Зажми мышь и протяни область вокруг слова.
+        В консоль выпадет готовый HTML-код хотспота.
+     4. Вставь его в HTML вместо старого.
+     5. Когда всё ровно: document.body.classList.remove('debug')
+  ============================================================ */
+
+  let calibStartX = 0, calibStartY = 0, calibRect = null, calibSlide = null;
+
+  document.addEventListener('mousedown', (e) => {
+    if (!document.body.classList.contains('debug')) return;
+    calibSlide = document.querySelector('.slide.active');
+    if (!calibSlide) return;
+    if (e.target.closest('.hotspot')) return;
+
+    const bbox = calibSlide.getBoundingClientRect();
+    calibStartX = e.clientX - bbox.left;
+    calibStartY = e.clientY - bbox.top;
+
+    calibRect = document.createElement('div');
+    calibRect.className = 'calib-rect';
+    calibRect.style.left = calibStartX + 'px';
+    calibRect.style.top  = calibStartY + 'px';
+    calibRect.style.width = '0';
+    calibRect.style.height = '0';
+    calibSlide.appendChild(calibRect);
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!calibRect || !calibSlide) return;
+    const bbox = calibSlide.getBoundingClientRect();
+    const curX = e.clientX - bbox.left;
+    const curY = e.clientY - bbox.top;
+
+    const x = Math.min(calibStartX, curX);
+    const y = Math.min(calibStartY, curY);
+    const w = Math.abs(curX - calibStartX);
+    const h = Math.abs(curY - calibStartY);
+
+    calibRect.style.left = x + 'px';
+    calibRect.style.top  = y + 'px';
+    calibRect.style.width = w + 'px';
+    calibRect.style.height = h + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!calibRect || !calibSlide) return;
+    const bbox = calibSlide.getBoundingClientRect();
+
+    const left   = (parseFloat(calibRect.style.left)   / bbox.width  * 100).toFixed(2);
+    const top    = (parseFloat(calibRect.style.top)    / bbox.height * 100).toFixed(2);
+    const width  = (parseFloat(calibRect.style.width)  / bbox.width  * 100).toFixed(2);
+    const height = (parseFloat(calibRect.style.height) / bbox.height * 100).toFixed(2);
+
+    console.log('%c=== Хотспот ===', 'color:#c69844;font-weight:bold;');
+    console.log(`<button class="hotspot"
+        style="left:${left}%; top:${top}%; width:${width}%; height:${height}%;"
+        aria-label=""
+        data-tip=""></button>`);
+
+    setTimeout(() => calibRect.remove(), 500);
+    calibRect = null;
+  });
+</script>
+</body>
+</html>
